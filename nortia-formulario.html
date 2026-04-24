@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Diagnóstico Financeiro Express | Nortia Finanças</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0d1b34;--blue:#3478d0;--gold:#b8962e;--white:#fff;--muted:#8a9ab5;--border:#1e3158;--bg:#0a1628}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+
+.card{background:var(--navy);border:1px solid var(--border);border-radius:16px;width:100%;max-width:520px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.4)}
+
+/* Progress bar */
+.progress-bar{height:4px;background:var(--border)}
+.progress-fill{height:4px;background:var(--blue);transition:width .4s ease;width:0%}
+
+.card-body{padding:40px 36px}
+
+/* Logo */
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:32px}
+.logo img{height:32px}
+
+/* Step */
+.step{display:none}
+.step.active{display:block}
+
+.step-tag{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--blue);font-weight:500;margin-bottom:12px}
+.step-question{font-size:22px;font-weight:600;color:var(--white);line-height:1.3;margin-bottom:8px}
+.step-hint{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+
+/* Input */
+input[type=text],input[type=tel]{
+  width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:8px;padding:14px 16px;color:var(--white);font-size:16px;
+  font-family:'Inter',sans-serif;outline:none;transition:border-color .2s;
+}
+input[type=text]::placeholder,input[type=tel]::placeholder{color:var(--muted)}
+input[type=text]:focus,input[type=tel]:focus{border-color:var(--blue)}
+
+/* Options */
+.options{display:flex;flex-direction:column;gap:10px}
+.option{
+  display:flex;align-items:center;gap:14px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:8px;padding:14px 16px;cursor:pointer;
+  transition:border-color .2s,background .2s;
+  font-size:15px;color:var(--white);
+}
+.option:hover{border-color:var(--blue);background:rgba(52,120,210,.08)}
+.option.selected{border-color:var(--blue);background:rgba(52,120,210,.15)}
+.option-dot{
+  width:20px;height:20px;min-width:20px;border-radius:50%;
+  border:2px solid var(--border);transition:all .2s;
+  display:flex;align-items:center;justify-content:center;
+}
+.option.selected .option-dot{background:var(--blue);border-color:var(--blue)}
+.option.selected .option-dot::after{content:'';width:8px;height:8px;border-radius:50%;background:#fff}
+
+/* Multi checkbox */
+.option.multi .option-dot{border-radius:4px}
+.option.multi.selected .option-dot{background:var(--blue);border-color:var(--blue)}
+
+/* Buttons */
+.btn-next{
+  width:100%;margin-top:28px;padding:16px;
+  background:var(--blue);color:#fff;border:none;
+  border-radius:8px;font-size:15px;font-weight:500;
+  font-family:'Inter',sans-serif;cursor:pointer;
+  transition:background .2s,transform .15s;
+}
+.btn-next:hover{background:#2d6bc4;transform:translateY(-1px)}
+.btn-next:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+.btn-back{
+  background:none;border:none;color:var(--muted);
+  font-size:13px;font-family:'Inter',sans-serif;
+  cursor:pointer;margin-top:12px;display:block;width:100%;text-align:center;
+  padding:8px;
+}
+.btn-back:hover{color:var(--white)}
+
+/* Success */
+.success{text-align:center;padding:16px 0}
+.success-icon{font-size:52px;margin-bottom:20px}
+.success h2{font-size:24px;font-weight:600;margin-bottom:12px}
+.success p{font-size:15px;color:var(--muted);line-height:1.7;margin-bottom:32px}
+.btn-wa{
+  display:inline-flex;align-items:center;gap:10px;
+  background:#25D366;color:#fff;padding:16px 32px;
+  border-radius:8px;font-size:15px;font-weight:500;
+  text-decoration:none;transition:background .2s;
+}
+.btn-wa:hover{background:#1ebe5d}
+.btn-wa svg{width:20px;height:20px;fill:#fff}
+
+/* Footer */
+.card-footer{padding:16px 36px;border-top:1px solid var(--border);text-align:center}
+.card-footer p{font-size:12px;color:var(--muted)}
+
+@media(max-width:480px){.card-body{padding:28px 20px}.step-question{font-size:19px}}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+  <div class="card-body">
+
+    <div class="logo">
+      <img src="https://i.imgur.com/placeholder.png" alt="Nortia" onerror="this.style.display='none'"/>
+      <span style="font-size:16px;font-weight:600;letter-spacing:.04em">NORTIA <span style="color:#3478d0">FINANÇAS</span></span>
+    </div>
+
+    <!-- STEP 1 — Nome -->
+    <div class="step active" id="step-1">
+      <div class="step-tag">Passo 1 de 4</div>
+      <h2 class="step-question">Qual é o seu nome e o nome da sua empresa?</h2>
+      <p class="step-hint">Só para eu saber com quem estou falando 😊</p>
+      <input type="text" id="input-nome" placeholder="Ex: João Silva — Empresa XYZ" oninput="checkInput('input-nome','btn-1')"/>
+      <button class="btn-next" id="btn-1" onclick="goTo(2)" disabled>Continuar →</button>
+    </div>
+
+    <!-- STEP 2 — Faturamento -->
+    <div class="step" id="step-2">
+      <div class="step-tag">Passo 2 de 4</div>
+      <h2 class="step-question">Qual é o faturamento médio mensal da sua empresa?</h2>
+      <p class="step-hint">Aproximado está ótimo — não precisa ser exato.</p>
+      <div class="options" id="opts-2">
+        <div class="option" onclick="selectOption(this,'opts-2','btn-2')"><div class="option-dot"></div>Até R$ 20 mil</div>
+        <div class="option" onclick="selectOption(this,'opts-2','btn-2')"><div class="option-dot"></div>Entre R$ 20 mil e R$ 50 mil</div>
+        <div class="option" onclick="selectOption(this,'opts-2','btn-2')"><div class="option-dot"></div>Entre R$ 50 mil e R$ 100 mil</div>
+        <div class="option" onclick="selectOption(this,'opts-2','btn-2')"><div class="option-dot"></div>Acima de R$ 100 mil</div>
+        <div class="option" onclick="selectOption(this,'opts-2','btn-2')"><div class="option-dot"></div>Prefiro não informar</div>
+      </div>
+      <button class="btn-next" id="btn-2" onclick="goTo(3)" disabled>Continuar →</button>
+      <button class="btn-back" onclick="goTo(1)">← Voltar</button>
+    </div>
+
+    <!-- STEP 3 — Dor -->
+    <div class="step" id="step-3">
+      <div class="step-tag">Passo 3 de 4</div>
+      <h2 class="step-question">Qual é o maior desafio financeiro que você enfrenta hoje?</h2>
+      <p class="step-hint">Pode marcar mais de uma opção.</p>
+      <div class="options" id="opts-3">
+        <div class="option multi" onclick="toggleMulti(this,'btn-3')"><div class="option-dot"></div>Não sei para onde vai o dinheiro</div>
+        <div class="option multi" onclick="toggleMulti(this,'btn-3')"><div class="option-dot"></div>Não tenho clareza do lucro real</div>
+        <div class="option multi" onclick="toggleMulti(this,'btn-3')"><div class="option-dot"></div>Falta controle do fluxo de caixa</div>
+        <div class="option multi" onclick="toggleMulti(this,'btn-3')"><div class="option-dot"></div>Misturo contas pessoais e da empresa</div>
+        <div class="option multi" onclick="toggleMulti(this,'btn-3')"><div class="option-dot"></div>Tomo decisões sem base em números</div>
+        <div class="option multi" onclick="toggleMulti(this,'btn-3')"><div class="option-dot"></div>Faturamento cresce mas lucro não aparece</div>
+      </div>
+      <button class="btn-next" id="btn-3" onclick="goTo(4)" disabled>Continuar →</button>
+      <button class="btn-back" onclick="goTo(2)">← Voltar</button>
+    </div>
+
+    <!-- STEP 4 — WhatsApp -->
+    <div class="step" id="step-4">
+      <div class="step-tag">Passo 4 de 4</div>
+      <h2 class="step-question">Qual é o seu WhatsApp?</h2>
+      <p class="step-hint">Vou entrar em contato para conversarmos sobre o seu negócio.</p>
+      <input type="tel" id="input-tel" placeholder="(54) 9 9999-9999" oninput="checkInput('input-tel','btn-4')"/>
+      <button class="btn-next" id="btn-4" onclick="submit()" disabled>Quero meu diagnóstico →</button>
+      <button class="btn-back" onclick="goTo(3)">← Voltar</button>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="step" id="step-success">
+      <div class="success">
+        <div class="success-icon">✅</div>
+        <h2>Perfeito, <span id="first-name"></span>!</h2>
+        <p>Recebi suas respostas e vou entrar em contato pelo WhatsApp em breve para conversarmos sobre o financeiro da sua empresa.</p>
+        <a class="btn-wa" href="https://wa.me/5554996063441?text=Ol%C3%A1%2C%20acabei%20de%20preencher%20o%20formul%C3%A1rio%20do%20Diagn%C3%B3stico%20Financeiro%20Express!" target="_blank">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Falar agora no WhatsApp
+        </a>
+      </div>
+    </div>
+
+  </div>
+  <div class="card-footer">
+    <p>Nortia Finanças · BPO & Consultoria Financeira · @nortiafinancas</p>
+  </div>
+</div>
+
+<script>
+const totalSteps = 4;
+
+function updateProgress(step) {
+  document.getElementById('progress').style.width = ((step / totalSteps) * 100) + '%';
+}
+
+function goTo(step) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-' + step).classList.add('active');
+  updateProgress(step);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function checkInput(inputId, btnId) {
+  const val = document.getElementById(inputId).value.trim();
+  document.getElementById(btnId).disabled = val.length < 2;
+}
+
+function selectOption(el, groupId, btnId) {
+  document.querySelectorAll('#' + groupId + ' .option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById(btnId).disabled = false;
+}
+
+function toggleMulti(el, btnId) {
+  el.classList.toggle('selected');
+  const anySelected = document.querySelectorAll('#opts-3 .option.selected').length > 0;
+  document.getElementById(btnId).disabled = !anySelected;
+}
+
+function submit() {
+  const nome = document.getElementById('input-nome').value.trim();
+  const firstName = nome.split(' ')[0];
+  document.getElementById('first-name').textContent = firstName;
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-success').classList.add('active');
+  document.getElementById('progress').style.width = '100%';
+
+  // Send to WhatsApp with all data
+  const fat = document.querySelector('#opts-2 .option.selected')?.textContent || '';
+  const dores = [...document.querySelectorAll('#opts-3 .option.selected')].map(o => o.textContent.trim()).join(', ');
+  const tel = document.getElementById('input-tel').value.trim();
+  const msg = encodeURIComponent(`Novo lead — Diagnóstico Express\n\nNome: ${nome}\nFaturamento: ${fat}\nDesafios: ${dores}\nWhatsApp: ${tel}`);
+  // Auto-notify (opens in background via image trick)
+  new Image().src = `https://wa.me/5554996063441?text=${msg}`;
+}
+
+updateProgress(1);
+</script>
+</body>
+</html>
