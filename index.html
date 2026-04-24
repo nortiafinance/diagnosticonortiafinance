@@ -215,21 +215,33 @@ function toggleMulti(el, btnId) {
   document.getElementById(btnId).disabled = !anySelected;
 }
 
-function submit() {
+async function submit() {
   const nome = document.getElementById('input-nome').value.trim();
   const firstName = nome.split(' ')[0];
+  const fat = document.querySelector('#opts-2 .option.selected')?.textContent.trim() || '';
+  const dores = [...document.querySelectorAll('#opts-3 .option.selected')].map(o => o.textContent.trim()).join(', ');
+  const tel = document.getElementById('input-tel').value.trim();
+  const data = new Date().toLocaleString('pt-BR', {timeZone:'America/Sao_Paulo'});
+
+  // Show success screen
   document.getElementById('first-name').textContent = firstName;
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
   document.getElementById('step-success').classList.add('active');
   document.getElementById('progress').style.width = '100%';
 
-  // Send to WhatsApp with all data
-  const fat = document.querySelector('#opts-2 .option.selected')?.textContent || '';
-  const dores = [...document.querySelectorAll('#opts-3 .option.selected')].map(o => o.textContent.trim()).join(', ');
-  const tel = document.getElementById('input-tel').value.trim();
-  const msg = encodeURIComponent(`Novo lead — Diagnóstico Express\n\nNome: ${nome}\nFaturamento: ${fat}\nDesafios: ${dores}\nWhatsApp: ${tel}`);
-  // Auto-notify (opens in background via image trick)
-  new Image().src = `https://wa.me/5554996063441?text=${msg}`;
+  // Send to Google Sheets
+  try {
+    await fetch('https://script.google.com/macros/s/AKfycbwyumuzMSeD0owPr011NTSCQjOagoPTPkuiPCmcJYXjoozqo9lTOcd-pzEb6D-lFLYB5Q/exec', {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ nome, faturamento: fat, desafios: dores, whatsapp: tel, data })
+    });
+  } catch(e) { console.log('Sheet error:', e); }
+
+  // Open WhatsApp
+  const msg = encodeURIComponent('Ola, preenchi o formulario do Diagnostico Financeiro Express da Nortia! Nome: ' + nome + ' | WhatsApp: ' + tel);
+  setTimeout(() => { window.open('https://wa.me/5554996063441?text=' + msg, '_blank'); }, 1500);
 }
 
 updateProgress(1);
