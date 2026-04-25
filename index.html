@@ -223,24 +223,31 @@ async function submit() {
   const tel = document.getElementById('input-tel').value.trim();
   const data = new Date().toLocaleString('pt-BR', {timeZone:'America/Sao_Paulo'});
 
-  // Show success screen
+  // Show success screen first
   document.getElementById('first-name').textContent = firstName;
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
   document.getElementById('step-success').classList.add('active');
   document.getElementById('progress').style.width = '100%';
 
-  // Send to Google Sheets
+  // Send to Google Sheets via FormData (avoids CORS issues)
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyumuzMSeD0owPr011NTSCQjOagoPTPkuiPCmcJYXjoozqo9lTOcd-pzEb6D-lFLYB5Q/exec';
+  const formData = new FormData();
+  formData.append('nome', nome);
+  formData.append('faturamento', fat);
+  formData.append('desafios', dores);
+  formData.append('whatsapp', tel);
+  formData.append('data', data);
+
   try {
-    await fetch('https://script.google.com/macros/s/AKfycbwyumuzMSeD0owPr011NTSCQjOagoPTPkuiPCmcJYXjoozqo9lTOcd-pzEb6D-lFLYB5Q/exec', {
+    await fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ nome, faturamento: fat, desafios: dores, whatsapp: tel, data })
+      body: formData
     });
   } catch(e) { console.log('Sheet error:', e); }
 
-  // Open WhatsApp
-  const msg = encodeURIComponent('Ola, preenchi o formulario do Diagnostico Financeiro Express da Nortia! Nome: ' + nome + ' | WhatsApp: ' + tel);
+  // Open WhatsApp after 1.5s
+  const msg = encodeURIComponent('Ola! Preenchi o formulario do Diagnostico Financeiro Express da Nortia!\n\nNome: ' + nome + '\nWhatsApp: ' + tel + '\nFaturamento: ' + fat + '\nDesafios: ' + dores);
   setTimeout(() => { window.open('https://wa.me/5554996063441?text=' + msg, '_blank'); }, 1500);
 }
 
